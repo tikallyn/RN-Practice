@@ -1,43 +1,50 @@
-import React, { useState } from 'react'
-import { Text, StyleSheet, Button, View, FlatList } from 'react-native'
+import React, { useReducer } from 'react'
+import { Text, StyleSheet, View } from 'react-native'
 import ColorCounter from '../components/ColorCounter'
 
 const COLOR_INCREMENT = 15
 
-const CustomColorScreen = () => {
-    const [red, setRed] = useState(Math.floor(Math.random() * 256))
-    const [green, setGreen] = useState(Math.floor(Math.random() * 256))
-    const [blue, setBlue] = useState(Math.floor(Math.random() * 256))
-
-    const setColor = (color, change) => {
-        //color == red, green, blue
-        //change === +15, -15
-        switch (color) {
-            case 'red':
-                red + change > 255 || red + change < 0 ? null : setRed(red + change)
-                return;
-            case 'green':
-                green + change > 255 || green + change < 0 ? null : setGreen(green + change)
-                return;
-            case 'blue':
-                blue + change > 255 || blue + change < 0 ? null : setBlue(blue + change)
-                return;
-        }
+const reducer = (state, action) => {
+    //state === { red: num, green: num, blue: num }
+    //action is an obj desc how to change state obj 
+    //action === { colorToChange: 'red || 'green' || 'blue', amount: -15, +15}
+    switch (action.colorToChange) {
+        case 'red':
+            return state.red + action.amount > 255 || state.red + action.amount < 0
+                ? state
+                : { ...state, red: state.red + action.amount }
+        case 'green':
+            return state.green + action.amount > 255 || state.green + action.amount < 0
+                ? state
+                : { ...state, green: state.green + action.amount }
+        case 'blue':
+            return state.blue + action.amount > 255 || state.blue + action.amount < 0
+                ? state
+                : { ...state, blue: state.blue + action.amount }
+        default:
+            return state
     }
+}
+
+const CustomColorScreen = () => {
+    const [state, dispatch] = useReducer(reducer, { red: 0, green: 0, blue: 0 })
+    const { red, green, blue } = state
+    //state will be set exactly equal to the obj in the second argument
+    //dispatch runs the reducer
 
     return <View>
         <Text style={styles.textStyle}>Create a Custom Color!</Text>
         <ColorCounter color='Red'
-            onIncrease={() => setColor('red', COLOR_INCREMENT)}
-            onDecrease={() => setColor('red', -1 * COLOR_INCREMENT)}
+            onIncrease={() => dispatch({ colorToChange: 'red', amount: COLOR_INCREMENT })}
+            onDecrease={() => dispatch({ colorToChange: 'red', amount: -1 * COLOR_INCREMENT })}
         />
         <ColorCounter color='Green'
-            onIncrease={() => setColor('green', COLOR_INCREMENT)}
-            onDecrease={() => setColor('green', -1 * COLOR_INCREMENT)}
+            onIncrease={() => dispatch({ colorToChange: 'green', amount: COLOR_INCREMENT })}
+            onDecrease={() => dispatch({ colorToChange: 'green', amount: -1 * COLOR_INCREMENT })}
         />
         <ColorCounter color='Blue'
-            onIncrease={() => setColor('blue', COLOR_INCREMENT)}
-            onDecrease={() => setColor('blue', -1 * COLOR_INCREMENT)}
+            onIncrease={() => dispatch({ colorToChange: 'blue', amount: COLOR_INCREMENT })}
+            onDecrease={() => dispatch({ colorToChange: 'blue', amount: -1 * COLOR_INCREMENT })}
         />
         <View style={{ alignSelf: 'center', height: 150, width: 150, backgroundColor: `rgb(${red}, ${green}, ${blue})` }} />
     </View>
